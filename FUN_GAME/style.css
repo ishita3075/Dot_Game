@@ -1,0 +1,373 @@
+:root {
+    --bg-color: #f0f8ff;
+    --board-bg: #ffffff;
+    --dot-color: #333;
+    --line-default: #eee;
+    --line-hover: #ddd;
+
+    --p1-color: #FF6B6B;
+    --p1-light: #ffcce0;
+    --p2-color: #4ECDC4;
+    --p2-light: #d6f5f3;
+
+    --text-color: #2c3e50;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+    --line-thickness: 10px;
+    --dot-size: 16px;
+
+    /* Responsive overrides will happen in JS or Media Queries if needed */
+}
+
+body {
+    font-family: 'Fredoka', sans-serif;
+    background: radial-gradient(circle at top right, #fff1eb 0%, #ace0f9 100%);
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color);
+    overflow: hidden;
+}
+
+.game-container {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+
+    /* Maximize Screen Real Estate */
+    width: 95vw;
+    height: 95vh;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    /* Minimal padding */
+    box-sizing: border-box;
+}
+
+/* COMPACT HEADER */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px 10px 10px;
+    flex-shrink: 0;
+    /* Header won't shrink, board will */
+    border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+}
+
+header h1 {
+    font-size: 1.8rem;
+    /* Smaller title */
+    margin: 0;
+    color: #FF9F1C;
+    text-shadow: 1px 1px 0px #FFE66D;
+}
+
+.scoreboard {
+    display: flex;
+    gap: 10px;
+}
+
+.player-score {
+    padding: 5px 15px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+}
+
+.player-score.player1 {
+    color: var(--p1-color);
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.player-score.player2 {
+    color: var(--p2-color);
+    background-color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Active State replaced text indicator */
+.player-score.active {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.player-score.active.player1 {
+    background-color: var(--p1-color);
+    color: white;
+    border-color: #fff;
+}
+
+.player-score.active.player2 {
+    background-color: var(--p2-color);
+    color: white;
+    border-color: #fff;
+}
+
+.player-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* MAIN BOARD AREA */
+main {
+    flex: 1;
+    /* Takes all remaining height */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 10px;
+}
+
+.board-wrapper {
+    /* We want the board to be as big as possible but aspect ratio constrained */
+    /* Since we generate a square/rectangular grid, we need it to fit CONSTRAINED */
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-board {
+    display: grid;
+    /* This will be sized by content OR by stretch? */
+    /* To fill the screen, we should use vmin or % dimensions for the cells. */
+    /* Let's try to make the chart fill the container using flex-grow or similar is hard with grid */
+    /* BEST APPROACH: Use vmin units for cells relative to viewport, but we have a container. */
+    /* ALTERNATIVE: width/height: 100% and map grid-template-rows/cols to percentages */
+    width: 100%;
+    height: 100%;
+    /* Max Aspect Ratio constraint */
+    max-width: 90vh;
+    /* roughly square */
+    max-height: 90vw;
+    margin: auto;
+    /* We will use fraction units (fr) in JS setup so it stretches */
+    gap: 0;
+}
+
+/* CELLS */
+.dot {
+    background-color: var(--dot-color);
+    border-radius: 50%;
+    z-index: 2;
+    position: relative;
+    /* Size needs to be dynamic or fixed small */
+    /* Let's make dots small fixed visual points, lines stretch */
+    min-width: 10px;
+    min-height: 10px;
+    /* Center in its cell area */
+    justify-self: center;
+    align-self: center;
+}
+
+.line {
+    background-color: var(--line-default);
+    cursor: pointer;
+    transition: background-color 0.2s;
+    position: relative;
+    z-index: 1;
+    border-radius: 5px;
+}
+
+.line:hover {
+    background-color: var(--line-hover);
+}
+
+.line.horizontal {
+    width: 90%;
+    height: 30%;
+    /* relative thickness? */
+    min-height: 8px;
+    max-height: 15px;
+    align-self: center;
+    justify-self: center;
+}
+
+.line.vertical {
+    height: 90%;
+    width: 30%;
+    min-width: 8px;
+    max-width: 15px;
+    justify-self: center;
+    align-self: center;
+}
+
+.line.filled.p1 {
+    background-color: var(--p1-color);
+}
+
+.line.filled.p2 {
+    background-color: var(--p2-color);
+}
+
+.box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    /* Will scale? maybe vw? */
+    font-weight: bold;
+    color: white;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.box.captured.p1 {
+    background-color: var(--p1-light);
+    color: var(--p1-color);
+}
+
+.box.captured.p2 {
+    background-color: var(--p2-light);
+    color: var(--p2-color);
+}
+
+
+/* FOOTER */
+footer {
+    padding-top: 5px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.btn-reset {
+    border: none;
+    background: transparent;
+    color: #FF9F1C;
+    padding: 5px 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.btn-reset:hover {
+    color: #e0890e;
+}
+
+/* MODALS */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.modal.hidden {
+    pointer-events: none;
+    opacity: 0;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.setup-content {
+    background: linear-gradient(135deg, #fff 0%, #f0f7ff 100%);
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.btn-primary {
+    background: #FF9F1C;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 0 #E0890E;
+}
+
+.btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 0 0 0;
+}
+
+@media (max-width: 600px) {
+    header h1 {
+        font-size: 1.2rem;
+    }
+
+    .player-name {
+        font-size: 0.7rem;
+    }
+
+    .score {
+        font-size: 1.2rem;
+    }
+
+    .player-score {
+        min-width: 60px;
+        padding: 5px;
+    }
+
+    /* Grid cells need to be careful on mobile */
+    .line.horizontal {
+        min-height: 6px;
+    }
+
+    .line.vertical {
+        min-width: 6px;
+    }
+
+    .box {
+        font-size: 1.2rem;
+    }
+}
